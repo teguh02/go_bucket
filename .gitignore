@@ -1,0 +1,37 @@
+# Dependencies
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with 'go test -c'
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files (keep .env.example)
+.env
+.env.local
+.env.*.local
+
+# Storage directory (mounted volume)
+storage/
+
+# Binary
+cdn-server
+
+# OS files
+.DS_Store
+Thumbs.db

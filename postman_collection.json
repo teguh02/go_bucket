@@ -1,0 +1,211 @@
+{
+	"info": {
+		"_postman_id": "cdn-storage-server",
+		"name": "CDN Storage Server",
+		"description": "Simple CDN Storage Server API - A lightweight file storage server similar to S3/GCS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "api_key",
+			"value": "change-me",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/health",
+					"host": ["{{base_url}}"],
+					"path": ["health"]
+				},
+				"description": "Check server health status"
+			},
+			"response": []
+		},
+		{
+			"name": "Upload File",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "",
+							"description": "File to upload (required)"
+						},
+						{
+							"key": "path",
+							"value": "images/example.png",
+							"type": "text",
+							"description": "Destination path (optional, defaults to original filename)"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/upload",
+					"host": ["{{base_url}}"],
+					"path": ["api", "upload"]
+				},
+				"description": "Upload a file to the storage server.\n\n**Auth Required**: X-API-Key or Authorization: Bearer\n\n**Form Fields**:\n- `file` (required): The file to upload\n- `path` (optional): Destination path, e.g., `avatars/user1.jpg`"
+			},
+			"response": []
+		},
+		{
+			"name": "Upload File (Bearer Auth)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{api_key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "",
+							"description": "File to upload (required)"
+						},
+						{
+							"key": "path",
+							"value": "documents/report.pdf",
+							"type": "text",
+							"description": "Destination path"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/upload",
+					"host": ["{{base_url}}"],
+					"path": ["api", "upload"]
+				},
+				"description": "Upload a file using Bearer token authentication"
+			},
+			"response": []
+		},
+		{
+			"name": "Get File (Public)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/files/images/example.png",
+					"host": ["{{base_url}}"],
+					"path": ["files", "images", "example.png"]
+				},
+				"description": "Access a file publicly (no auth required).\n\nChange the path to match your uploaded file."
+			},
+			"response": []
+		},
+		{
+			"name": "List Files",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/list",
+					"host": ["{{base_url}}"],
+					"path": ["api", "list"]
+				},
+				"description": "List all files in the storage"
+			},
+			"response": []
+		},
+		{
+			"name": "List Files with Prefix",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/list?prefix=images",
+					"host": ["{{base_url}}"],
+					"path": ["api", "list"],
+					"query": [
+						{
+							"key": "prefix",
+							"value": "images",
+							"description": "Filter files by prefix/folder"
+						}
+					]
+				},
+				"description": "List files with a specific prefix (folder)"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete File",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/files/images/example.png",
+					"host": ["{{base_url}}"],
+					"path": ["api", "files", "images", "example.png"]
+				},
+				"description": "Delete a file from storage.\n\n**Auth Required**: X-API-Key or Authorization: Bearer\n\nChange the path to match the file you want to delete."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete File (Bearer Auth)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{api_key}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/files/documents/report.pdf",
+					"host": ["{{base_url}}"],
+					"path": ["api", "files", "documents", "report.pdf"]
+				},
+				"description": "Delete a file using Bearer token authentication"
+			},
+			"response": []
+		}
+	]
+}
