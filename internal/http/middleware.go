@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/teguh02/education_storage/internal/config"
+	"github.com/teguh02/go_bucket/internal/config"
 )
 
 // Middleware is a function that wraps an http.Handler

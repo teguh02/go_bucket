@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/teguh02/education_storage/internal/config"
+	"github.com/teguh02/go_bucket/internal/config"
 )
 
 // Handler holds dependencies for HTTP handlers
