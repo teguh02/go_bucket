@@ -1,6 +1,8 @@
-# Simple CDN Storage Server
+# go_bucket
 
-A lightweight file storage server in Go, similar to S3/Google Cloud Storage but much simpler. No database required - uses filesystem only.
+A lightweight, open-source file storage server written in Go, inspired by Amazon S3 concepts. Originally built for internal use and now released as an open-source project under the name **go_bucket**.
+
+Store, retrieve, delete, and list files via a simple HTTP API — no database required, filesystem only.
 
 ## Features
 
@@ -17,7 +19,7 @@ A lightweight file storage server in Go, similar to S3/Google Cloud Storage but 
 
 ```bash
 # Clone and enter directory
-cd education_storage
+cd go_bucket
 
 # Copy environment file
 cp .env.example .env
@@ -155,7 +157,7 @@ curl "http://localhost:8080/api/list?prefix=avatars" \
 ## Project Structure
 
 ```
-education_storage/
+go_bucket/
 ├── cmd/
 │   └── server/
 │       └── main.go          # Application entry point

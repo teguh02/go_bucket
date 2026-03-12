@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/teguh02/education_storage/internal/config"
-	handler "github.com/teguh02/education_storage/internal/http"
+	"github.com/teguh02/go_bucket/internal/config"
+	handler "github.com/teguh02/go_bucket/internal/http"
 )
 
 func main() {
