@@ -1,4 +1,5 @@
-# go_bucket
+# Go Bucket
+![Go Bucket](Go_Bucket_logo_202604091004.jpeg)
 
 A lightweight, open-source file storage server written in Go, inspired by Amazon S3 concepts. Originally built for internal use and now released as an open-source project under the name **go_bucket**.
 
