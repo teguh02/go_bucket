@@ -33,7 +33,7 @@
 			"response": []
 		},
 		{
-			"name": "Upload File",
+			"name": "Upload File (Multipart)",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -65,7 +65,7 @@
 					"host": ["{{base_url}}"],
 					"path": ["api", "upload"]
 				},
-				"description": "Upload a file to the storage server.\n\n**Auth Required**: X-API-Key or Authorization: Bearer\n\n**Form Fields**:\n- `file` (required): The file to upload\n- `path` (optional): Destination path, e.g., `avatars/user1.jpg`"
+				"description": "Upload a file using multipart/form-data.\n\n**Auth Required**: X-API-Key or Authorization: Bearer\n\n**Form Fields**:\n- `file` (required): The file to upload\n- `path` (optional): Destination path, e.g., `avatars/user1.jpg`\n\n**Response includes** `hash.md5` and `hash.sha1` for integrity checking."
 			},
 			"response": []
 		},
@@ -107,6 +107,186 @@
 			"response": []
 		},
 		{
+			"name": "Upload File (URL)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"value": "https://placehold.co/600x400.png",
+							"type": "text",
+							"description": "Remote URL — server will download and store the file"
+						},
+						{
+							"key": "path",
+							"value": "images/placeholder.png",
+							"type": "text",
+							"description": "Destination path (optional, defaults to filename from URL)"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/upload",
+					"host": ["{{base_url}}"],
+					"path": ["api", "upload"]
+				},
+				"description": "Upload a file by supplying a remote URL as the `file` field. The server fetches and stores the file.\n\nSupports any publicly accessible URL pointing to a file (image, PDF, audio, video, etc.)."
+			},
+			"response": []
+		},
+		{
+			"name": "Upload File (Base64)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"value": "data:text/plain;base64,SGVsbG8gV29ybGQh",
+							"type": "text",
+							"description": "Base64-encoded file content (plain base64 or data URI)"
+						},
+						{
+							"key": "path",
+							"value": "files/hello.txt",
+							"type": "text",
+							"description": "Destination path (optional)"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/upload",
+					"host": ["{{base_url}}"],
+					"path": ["api", "upload"]
+				},
+				"description": "Upload a file using base64-encoded content.\n\nThe `file` field accepts:\n- Plain base64: `SGVsbG8gV29ybGQh`\n- Data URI: `data:text/plain;base64,SGVsbG8gV29ybGQh`"
+			},
+			"response": []
+		},
+		{
+			"name": "Upload File (Binary Body)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/octet-stream",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": ""
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/upload?path=binary/file.bin",
+					"host": ["{{base_url}}"],
+					"path": ["api", "upload"],
+					"query": [
+						{
+							"key": "path",
+							"value": "binary/file.bin",
+							"description": "Destination path (required for binary uploads)"
+						}
+					]
+				},
+				"description": "Upload a file by sending raw binary bytes as the request body.\n\nUseful for Ajax / axios / jQuery XHR uploads from the browser.\n\nThe destination path must be provided via:\n- `?path=` query parameter, OR\n- `X-File-Path` request header"
+			},
+			"response": []
+		},
+		{
+			"name": "Upload File (JSON - URL)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"file\": \"https://placehold.co/600x400.png\",\n  \"path\": \"images/placeholder.png\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/upload",
+					"host": ["{{base_url}}"],
+					"path": ["api", "upload"]
+				},
+				"description": "Upload a file via JSON body.\n\nThe `file` field accepts a remote URL or base64-encoded data.\nThe `path` field sets the destination path."
+			},
+			"response": []
+		},
+		{
+			"name": "Upload File (JSON - Base64)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"file\": \"SGVsbG8gV29ybGQh\",\n  \"path\": \"files/hello.txt\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/upload",
+					"host": ["{{base_url}}"],
+					"path": ["api", "upload"]
+				},
+				"description": "Upload a file via JSON body with base64-encoded content."
+			},
+			"response": []
+		},
+		{
 			"name": "Get File (Public)",
 			"request": {
 				"method": "GET",
@@ -136,7 +316,39 @@
 					"host": ["{{base_url}}"],
 					"path": ["api", "list"]
 				},
-				"description": "List all files in the storage"
+				"description": "List all files in the storage (page 1, 10 per page by default).\n\nEach file entry includes `hash.md5` and `hash.sha1` for integrity checking.\n\nResponse includes pagination metadata: `page`, `per_page`, `total`, `total_pages`."
+			},
+			"response": []
+		},
+		{
+			"name": "List Files (Page 2)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/list?page=2&per_page=10",
+					"host": ["{{base_url}}"],
+					"path": ["api", "list"],
+					"query": [
+						{
+							"key": "page",
+							"value": "2",
+							"description": "Page number (default: 1)"
+						},
+						{
+							"key": "per_page",
+							"value": "10",
+							"description": "Results per page (default: 10)"
+						}
+					]
+				},
+				"description": "List files with explicit pagination parameters."
 			},
 			"response": []
 		},
@@ -183,7 +395,7 @@
 					"host": ["{{base_url}}"],
 					"path": ["api", "files", "images", "example.png"]
 				},
-				"description": "Delete a file from storage.\n\n**Auth Required**: X-API-Key or Authorization: Bearer\n\nChange the path to match the file you want to delete."
+				"description": "Delete a file from storage.\n\n**Auth Required**: X-API-Key or Authorization: Bearer\n\n**Note**: Deletion can be disabled server-side via `ALLOW_DELETE=false`. In that case this endpoint returns HTTP 403 regardless of API key validity.\n\nChange the path to match the file you want to delete."
 			},
 			"response": []
 		},
@@ -209,3 +421,4 @@
 		}
 	]
 }
+

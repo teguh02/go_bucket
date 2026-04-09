@@ -20,6 +20,7 @@ type Config struct {
 	PublicBaseURL      string
 	MaxUploadMB        int64
 	AllowOverwrite     bool
+	AllowDelete        bool
 	CORSAllowedOrigins []string
 	CacheMaxAge        int // in seconds
 }
@@ -54,6 +55,10 @@ func Load() (*Config, error) {
 	// Allow overwrite (default: false for safety)
 	allowOverwriteStr := getEnvOrDefault("ALLOW_OVERWRITE", "false")
 	cfg.AllowOverwrite = strings.ToLower(allowOverwriteStr) == "true"
+
+	// Allow delete (default: true)
+	allowDeleteStr := getEnvOrDefault("ALLOW_DELETE", "true")
+	cfg.AllowDelete = strings.ToLower(allowDeleteStr) != "false"
 
 	// CORS allowed origins (default: *)
 	corsOrigins := getEnvOrDefault("CORS_ALLOWED_ORIGINS", "*")
