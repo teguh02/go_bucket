@@ -473,6 +473,13 @@ func (h *Handler) handleBinaryUpload(w http.ResponseWriter, r *http.Request) {
 	h.finishUpload(w, r, destPath, r.Body, contentType)
 }
 
+// urlFetchClient is a shared HTTP client used for remote URL downloads.
+// It enforces an overall connection timeout; the per-request deadline is
+// further restricted by the context passed to each request.
+var urlFetchClient = &http.Client{
+	Timeout: 60 * time.Second,
+}
+
 // handleStringFile processes a "file" value that is either a URL or base64 data.
 func (h *Handler) handleStringFile(w http.ResponseWriter, r *http.Request, fileValue string, destPath string) {
 	if strings.HasPrefix(fileValue, "http://") || strings.HasPrefix(fileValue, "https://") {
@@ -486,7 +493,7 @@ func (h *Handler) handleStringFile(w http.ResponseWriter, r *http.Request, fileV
 			return
 		}
 
-		resp, err := http.DefaultClient.Do(req)
+		resp, err := urlFetchClient.Do(req)
 		if err != nil {
 			jsonError(w, http.StatusBadRequest, "failed to download file from URL: "+err.Error())
 			return
