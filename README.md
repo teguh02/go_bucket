@@ -1,27 +1,50 @@
 # Go Bucket
 ![Go Bucket](Go_Bucket_logo_202604091004.jpeg)
 
-A lightweight, open-source file storage server written in Go, inspired by Amazon S3 concepts. Originally built for internal use and now released as an open-source project under the name **go_bucket**.
+A lightweight, open-source file storage server written in Go, inspired by Amazon S3 concepts.
 
 Store, retrieve, delete, and list files via a simple HTTP API — no database required, filesystem only.
 
 ## Features
 
-- ✅ **Upload files** with API key authentication
+- **Upload files** with API key authentication
   - Multipart form file upload (standard HTML form / curl)
   - Base64-encoded upload (plain base64 or `data:` URI)
   - URL upload (server fetches the file from a remote URL)
   - Raw binary body upload (Ajax `application/octet-stream`)
-- ✅ **Delete files** with API key authentication (configurable via `ALLOW_DELETE`)
-- ✅ **List files** with optional prefix filtering and **pagination**
-- ✅ **File integrity hashes** — MD5 and SHA1 included in upload and list responses
-- ✅ **Serve files publicly** (no auth required)
-- ✅ **Path traversal protection** - secure against `../` attacks
-- ✅ **Streaming file serving** - memory efficient
-- ✅ **CORS support** - configurable origins
-- ✅ **Docker ready** - multi-stage build, non-root user
+- **Delete files** with API key authentication (configurable via `ALLOW_DELETE`)
+- **List files** with optional prefix filtering and **pagination**
+- **File integrity hashes** — MD5 and SHA1 included in upload and list responses
+- **Serve files publicly** (no auth required)
+- **Path traversal protection** - secure against `../` attacks
+- **Streaming file serving** - memory efficient
+- **CORS support** - configurable origins
+- **Docker ready** - multi-stage build, non-root user
 
 ## Quick Start
+
+### Using Docker Hub Image (Recommended)
+
+```bash
+# Create storage directory
+mkdir -p storage
+
+# Create .env file
+echo "STORAGE_API_KEY=your-secret-key-here" > .env
+
+# Run container
+docker run -d \
+  --name go_bucket \
+  -p 8080:8080 \
+  -v $(pwd)/storage:/data \
+  --env-file .env \
+  teguh02/go_bucket:latest
+
+# Check health
+curl http://localhost:8080/health
+```
+
+### Using Docker Compose
 
 ```bash
 # Clone and enter directory
@@ -33,11 +56,150 @@ cp .env.example .env
 # Edit .env and set your API key
 # STORAGE_API_KEY=your-secret-key-here
 
-# Start with Docker Compose
-docker compose up -d --build
+# Start
+docker compose up -d
 
 # Check health
 curl http://localhost:8080/health
+```
+
+## Docker Compose Examples
+
+### Basic Usage
+
+```yaml
+# docker-compose.yml
+services:
+  go_bucket:
+    image: teguh02/go_bucket:latest
+    container_name: go_bucket
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./storage:/data
+    environment:
+      - STORAGE_API_KEY=your-secret-key
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+```
+
+### Production Setup with Custom Domain
+
+```yaml
+# docker-compose.prod.yml
+services:
+  go_bucket:
+    image: teguh02/go_bucket:latest
+    container_name: go_bucket
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./storage:/data
+    environment:
+      - STORAGE_API_KEY=${STORAGE_API_KEY}
+      - PORT=8080
+      - MAX_UPLOAD_MB=100
+      - ALLOW_OVERWRITE=false
+      - ALLOW_DELETE=true
+      - CORS_ALLOWED_ORIGINS=https://yourdomain.com
+      - PUBLIC_BASE_URL=https://cdn.yourdomain.com
+      - CACHE_MAX_AGE=86400
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+```
+
+### Development Setup (Allow Overwrite, Larger Uploads)
+
+```yaml
+# docker-compose.dev.yml
+services:
+  go_bucket:
+    image: teguh02/go_bucket:latest
+    container_name: go_bucket_dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./storage:/data
+    environment:
+      - STORAGE_API_KEY=dev-key
+      - PORT=8080
+      - MAX_UPLOAD_MB=500
+      - ALLOW_OVERWRITE=true
+      - ALLOW_DELETE=true
+      - CORS_ALLOWED_ORIGINS=*
+      - PUBLIC_BASE_URL=http://localhost:8080
+    restart: unless-stopped
+```
+
+### With nginx Reverse Proxy
+
+```yaml
+# docker-compose.proxy.yml
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./storage:/data
+    depends_on:
+      - go_bucket
+    restart: unless-stopped
+
+  go_bucket:
+    image: teguh02/go_bucket:latest
+    container_name: go_bucket
+    volumes:
+      - ./storage:/data
+    environment:
+      - STORAGE_API_KEY=${STORAGE_API_KEY}
+      - PORT=8080
+      - PUBLIC_BASE_URL=https://cdn.yourdomain.com
+    restart: unless-stopped
+```
+
+```nginx
+# nginx.conf
+upstream go_bucket {
+    server go_bucket:8080;
+}
+
+server {
+    listen 80;
+    server_name cdn.yourdomain.com;
+
+    location / {
+        proxy_pass http://go_bucket;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /files/ {
+        proxy_pass http://go_bucket;
+        proxy_set_header Host $host;
+        add_header Cache-Control "public, max-age=31536000";
+    }
+}
+```
+
+Run with:
+```bash
+docker compose -f docker-compose.proxy.yml up -d
 ```
 
 ## API Endpoints
@@ -252,7 +414,7 @@ curl "http://localhost:8080/api/list?prefix=avatars" \
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `STORAGE_API_KEY` | ✅ Yes | - | API key for upload/delete operations |
+| `STORAGE_API_KEY` | Yes | - | API key for upload/delete/list operations |
 | `PORT` | No | `8080` | Server port |
 | `STORAGE_DIR` | No | `/data` | Storage directory (container path) |
 | `PUBLIC_BASE_URL` | No | auto | Base URL for generated file URLs |
@@ -374,7 +536,16 @@ go build -o cdn-server ./cmd/server
 go test ./... -v -race
 ```
 
+### Build and Push Docker Image
+
+```bash
+# Build
+docker build -t teguh02/go_bucket:latest .
+
+# Push to Docker Hub
+docker push teguh02/go_bucket:latest
+```
+
 ## License
 
 MIT
-

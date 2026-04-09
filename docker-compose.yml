@@ -1,6 +1,6 @@
 services:
   cdn:
-    build: .
+    image: teguh02/go_bucket:latest
     container_name: cdn-storage
     ports:
       - "${PORT:-8080}:8080"
